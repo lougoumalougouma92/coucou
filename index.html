@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Une petite question...</title>
+    
+    <!-- CDN Confetti stable -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #ffdee9;
+            --card-bg: #ffffff;
+            --text-color: #5c1d3a;
+            --btn-yes: #e05286;
+            --btn-no: #b388ff;
+            --grid-bg: #fdf6f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(0deg, #ffdee9 0%, #b5fffc 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(224, 82, 134, 0.15);
+            text-align: center;
+            width: 90%;
+            max-width: 440px;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .avatar-container {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 25px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: 1.7rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        /* Style de texte de la dernière page (traduit en FR) */
+        .romantic-title {
+            font-size: 1.6rem;
+            color: #5c1d3a;
+            font-weight: bold;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .romantic-subtext {
+            font-size: 0.9rem;
+            color: #8c6d7d;
+            font-style: italic;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .hearts {
+            color: #e05286;
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            margin: 15px 0 25px 0;
+        }
+
+        p.subtitle {
+            color: #8c6d7d;
+            font-size: 0.95rem;
+            margin-top: -15px;
+            margin-bottom: 25px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            min-height: 70px;
+            position: relative;
+        }
+
+        button {
+            padding: 12px 35px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #btn-yes { background-color: var(--btn-yes); }
+        #btn-yes:hover { background-color: #cb3b6f; transform: scale(1.05); }
+        #btn-no { background-color: var(--btn-no); position: relative; z-index: 20; white-space: nowrap; }
+
+        /* Grille des repas (image_3e3077.png) */
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .food-item {
+            background: var(--grid-bg);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .food-item span { font-size: 1.6rem; }
+        .food-item p { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+        .food-item:hover { transform: translateY(-3px); background-color: #fff0f5; }
+        .food-item.selected { border-color: var(--btn-yes); background-color: #ffeef3; box-shadow: 0 0 10px rgba(224, 82, 134, 0.15); }
+
+        /* Inputs Planification */
+        .inputs-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        label { color: var(--text-color); font-weight: 600; font-size: 0.9rem; margin-left: 5px; }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #f3e5f5;
+            border-radius: 16px;
+            font-size: 1rem;
+            color: var(--text-color);
+            outline: none;
+            background-color: #fdfbfd;
+        }
+        input:focus, select:focus { border-color: var(--btn-yes); background-color: #fff; }
+
+        .action-btn { background-color: var(--btn-yes); width: 100%; border-radius: 16px; padding: 14px; }
+        .action-btn:hover { background-color: #cb3b6f; }
+
+        /* Bloc Récapitulatif */
+        .recap-box {
+            background: #fff5f8;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 10px;
+            text-align: center;
+            border: 1px dashed var(--btn-yes);
+        }
+
+        .recap-item {
+            margin: 6px 0;
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        /* Bouton Instagram personnalisé style "Replit" de la Photo 3 */
+        .insta-btn-replit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.25);
+            transition: transform 0.2s;
+            width: 85%;
+            margin: 0 auto;
+        }
+
+        .insta-btn-replit:hover {
+            transform: scale(1.05);
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- ÉTAPE 1 : Accueil (Le Carlin en veste jean) -->
+    <div id="step-1" class="card">
+        <div class="avatar-container">
+            <img src="41dcmHij82L.jpg" alt="Tu veux aller au resto avec moi ?">
+        </div>
+        <h1>🌸 Tu veux aller au resto avec moi ? 🌸</h1>
+        <div class="btn-group">
+            <button id="btn-yes">OUI ❤️</button>
+            <button id="btn-no">Non 🐾</button>
+        </div>
+    </div>
+
+    <!-- ÉTAPE 2 : Surprise (Le Carlin fou/joyeux) -->
+    <div id="step-2" class="card hidden">
+        <div class="avatar-container">
+            <img src="pngtree-cute-funny-crazy-pug-dog-png-image_14900820.jpg" alt="Tu as dit oui ?!">
+        </div>
+        <h1>ATTENDS, TU AS VRAIMENT DIT OUI ?! 😭</h1>
+        <p class="subtitle">J'étais tellement prêt à ce que tu dises non... 😂</p>
+        <button id="btn-next" class="action-btn">On organise ça ! →</button>
+    </div>
+
+    <!-- ÉTAPE 3 : Planification (Le petit chat poli qui sourit) -->
+    <div id="step-3" class="card hidden">
+        <div class="avatar-container">
+            <img src="images.jpg" alt="Tu es libre quand ?">
+        </div>
+        <h1>Du coup... tu es libre quand ? 📅</h1>
+        <div class="inputs-group">
+            <div>
+                <label for="date-picker">Choisis un jour</label>
+                <input type="date" id="date-picker" required>
+            </div>
+            <div>
+                <label for="time-picker">Quelle heure t'arrange ? ⏰</label>
+                <select id="time-picker" required>
+                    <option value="" disabled selected>Sélectionner une heure...</option>
+                    <option value="12:00">12:00 (Midi) ☀️</option>
+                    <option value="19:00">19:00 (Dîner tôt) 🍕</option>
+                    <option value="19:30">19:30 (Le classique) 🍷</option>
+                    <option value="20:00">20:00 (Parfait) ✨</option>
+                    <option value="20:30">20:30 (Tardif) 🌙</option>
+                </select>
+            </div>
+        </div>
+        <button id="btn-to-food" class="action-btn">Étape suivante ! →</button>
+    </div>
+
+    <!-- ÉTAPE 4 : Choix du repas (Grille complète style image_3e3c95.png) -->
+    <div id="step-4" class="card hidden">
+        <h1>On part sur quelle vibe ? 🍽️✨</h1>
+        <p class="subtitle">Choisis ton camp :</p>
+        
+        <div class="food-grid">
+            <div class="food-item" data-food="Pizza">
+                <span>🍕</span>
+                <p>Pizza</p>
+            </div>
+            <div class="food-item" data-food="Sushi">
+                <span>🍣</span>
+                <p>Sushi</p>
+            </div>
+            <div class="food-item" data-food="Burgers">
+                <span>🍔</span>
+                <p>Burgers</p>
+            </div>
+            <div class="food-item" data-food="Pasta">
+                <span>🍝</span>
+                <p>Pasta</p>
+            </div>
+            <div class="food-item" data-food="Tacos">
+                <span>🌮</span>
+                <p>Tacos</p>
+            </div>
+            <div class="food-item" data-food="Ramen">
+                <span>🍜</span>
+                <p>Ramen</p>
+            </div>
+        </div>
+
+        <button id="btn-to-recap" class="action-btn">Valider mon choix 🔗</button>
+    </div>
+
+    <!-- ÉTAPE 5 : Page Finale en Français (Style image_3e3c95.png) -->
+    <div id="step-5" class="card hidden">
+        <div class="romantic-title">Trop cool que tu n'aies pas dit non. Sois prête, je viens te chercher ! 🚗💨</div>
+        
+        <!-- Récapitulatif -->
+        <div class="recap-box">
+            <div class="recap-item">🗓️ <strong><span id="recap-date">--</span></strong> à <strong><span id="recap-time">--</span></strong></div>
+            <div class="recap-item">🍕 Au menu : <strong><span id="recap-food">--</span></strong></div>
+        </div>
+
+        <div class="romantic-subtext">
+            P.S. Message de gens normaux. J'ai codé un site web pendant ma pause juste pour toi, rien de bien fou. Envoie-moi un screen !
+        </div>
+        
+        <div class="hearts">♥ ♥ ♥ ♥ ♥</div>
+
+        <!-- Bouton Instagram -->
+        <a href="https://www.instagram.com/titii_ss/" target="_blank" class="insta-btn-replit">
+            📸 Envoie un DM sur @titii_ss
+        </a>
+    </div>
+
+    <script>
+        function lancerConfetti(options) {
+            if (typeof confetti === 'function') confetti(options);
+        }
+
+        // FUITE DU BOUTON "NON"
+        const config = { detectionRadius: 100, speed: 0.14, margin: 25 };
+        const btnNo = document.getElementById('btn-no');
+        let btnPos = { x: 0, y: 0 }, targetPos = { x: 0, y: 0 }, mousePos = { x: 0, y: 0 }, isInitialized = false;
+
+        function initButtonPosition() {
+            const rect = btnNo.getBoundingClientRect();
+            btnPos.x = rect.left; btnPos.y = rect.top;
+            targetPos.x = btnPos.x; targetPos.y = btnPos.y;
+            btnNo.style.position = 'fixed';
+            btnNo.style.left = '0px'; btnNo.style.top = '0px'; btnNo.style.margin = '0';
+            isInitialized = true;
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isInitialized) initButtonPosition();
+            mousePos.x = e.clientX; mousePos.y = e.clientY;
+            const rect = btnNo.getBoundingClientRect();
+            const btnCenterX = btnPos.x + rect.width / 2;
+            const btnCenterY = btnPos.y + rect.height / 2;
+            const deltaX = btnCenterX - mousePos.x;
+            const deltaY = btnCenterY - mousePos.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            if (distance < config.detectionRadius) {
+                const dirX = deltaX / (distance || 1);
+                const dirY = deltaY / (distance || 1);
+                const force = (config.detectionRadius - distance) * 1.6;
+                targetPos.x = btnPos.x + dirX * force;
+                targetPos.y = btnPos.y + dirY * force;
+
+                const minX = config.margin, minY = config.margin;
+                const maxX = window.innerWidth - rect.width - config.margin;
+                const maxY = window.innerHeight - rect.height - config.margin;
+
+                if (targetPos.x < minX) targetPos.x = minX;
+                if (targetPos.x > maxX) targetPos.x = maxX;
+                if (targetPos.y < minY) targetPos.y = minY;
+                if (targetPos.y > maxY) targetPos.y = maxY;
+            }
+        });
+
+        function animate() {
+            if (isInitialized) {
+                btnPos.x += (targetPos.x - btnPos.x) * config.speed;
+                btnPos.y += (targetPos.y - btnPos.y) * config.speed;
+                btnNo.style.transform = `translate3d(${btnPos.x}px, ${btnPos.y}px, 0)`;
+            }
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+        window.addEventListener('resize', () => { isInitialized = false; });
+
+        // LOGIQUE DE NAVIGATION
+        const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3'), document.getElementById('step-4'), document.getElementById('step-5')];
+        let selectedFood = "";
+
+        function changeStep(from, to) {
+            steps[from-1].classList.add('hidden');
+            steps[to-1].classList.remove('hidden');
+            steps[to-1].classList.add('fade-in');
+        }
+
+        document.getElementById('btn-yes').addEventListener('click', () => {
+            lancerConfetti({ particleCount: 140, spread: 75, origin: { y: 0.6 } });
+            changeStep(1, 2);
+        });
+
+        document.getElementById('btn-next').addEventListener('click', () => {
+            changeStep(2, 3);
+            document.getElementById('date-picker').valueAsDate = new Date();
+        });
+
+        document.getElementById('btn-to-food').addEventListener('click', () => {
+            if(!document.getElementById('date-picker').value || !document.getElementById('time-picker').value) {
+                alert("Tu as oublié de choisir le jour et l'heure ! Pas de triche 😉");
+                return;
+            }
+            changeStep(3, 4);
+        });
+
+        document.querySelectorAll('.food-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.food-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedFood = this.getAttribute('data-food');
+            });
+        });
+
+        document.getElementById('btn-to-recap').addEventListener('click', () => {
+            if(!selectedFood) {
+                alert("Choisis ce qu'on mange ! C'est important ! 😋");
+                return;
+            }
+
+            const rawDate = new Date(document.getElementById('date-picker').value);
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            const formattedDate = rawDate.toLocaleDateString('fr-FR', options);
+            const selectedTime = document.getElementById('time-picker').value;
+
+            document.getElementById('recap-date').innerText = formattedDate;
+            document.getElementById('recap-time').innerText = selectedTime;
+            document.getElementById('recap-food').innerText = selectedFood;
+
+            changeStep(4, 5);
+
+            lancerConfetti({ particleCount: 100, angle: 60, spread: 60, origin: { x: 0 } });
+            lancerConfetti({ particleCount: 100, angle: 120, spread: 60, origin: { x: 1 } });
+        });
+    </script>
+</body>
+</html>
